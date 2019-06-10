@@ -76,8 +76,21 @@ uint8_t *load_file(char *filename) {
 }
 
 //OP CODES
+uint8_t *op_nop(uint8_t *ip, STACK *s) {
+  return ip + 1;
+}
 
-uint8_t op_nop(uint8_t *ip, STACK *s) {
+uint8_t *op_push_char(uint8_t *ip, STACK *s) {
+  OBJECT o;
+  o.type = 'c';
+  o.u8   = *(ip + 1);
+  stack_push(s, o);
+  return ip + 2;
+}
+
+uint8_t *op_emit(uint8_t *ip, STACK *s) {
+  OBJECT o = stack_pop(s);
+  putchar(o.u8);
   return ip + 1;
 }
 
@@ -97,11 +110,17 @@ int main (int argc, char **argv) {
   if(argc != 2) {
     usage();
   }
+
+  ops['c'] = op_push_char;
+  ops['e'] = op_emit;
+
   code = load_file(argv[1]);
   data = stack_new(1024);
   ip = code;
 
-
+  while(*ip != 'h') {
+    ip = ops[*ip](ip, &data);
+  }
 
   return 0;
 }
