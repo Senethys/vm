@@ -28,6 +28,10 @@ typedef struct STACK_t {
     OBJECT *stack;
 } STACK;
 
+//An instruction type is going to be a function pointer.
+//An instruction function returns a pointer to a un insght 8 bit integer
+// and it takes as it arugments an integer and the address of a stack.
+typedef uint8_t* (*instruction)(uint8_t *, STACK *);
 
 STACK stack_new(int size){
   STACK s;
@@ -71,14 +75,33 @@ uint8_t *load_file(char *filename) {
   return code;
 }
 
+//OP CODES
+
+uint8_t op_nop(uint8_t *ip, STACK *s) {
+  return ip + 1;
+}
+
+
+
 /* Main Algorithm */
 int main (int argc, char **argv) {
   printf("Running...");
   uint8_t *code;
+  uint8_t *ip;
+  STACK data;
+
+  //Because an instruction is a byte, there is a possibility of 256 commands.
+  //Array of 256 instructions.
+  instruction ops[256];
 
   if(argc != 2) {
     usage();
   }
   code = load_file(argv[1]);
+  data = stack_new(1024);
+  ip = code;
+
+
+
   return 0;
 }
